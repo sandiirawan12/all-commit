@@ -1,0 +1,12 @@
+{
+  "name": "all-commit",
+  "version": "1.0.0",
+  "description": "Craft clear conventional commit messages in the browser",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes serve . -p 4173",
+    "dev": "npx --yes serve . -p 4173"
+  },
+  "keywords": ["git", "commit", "conventional-commits"],
+  "license": "MIT"
+}

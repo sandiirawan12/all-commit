@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Commit — Commit Message Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true"></div>
+    <main class="shell">
+      <header class="brand">
+        <p class="logo">All Commit</p>
+        <p class="tagline">Write clearer git commits in under a minute.</p>
+      </header>
+
+      <section class="builder" aria-labelledby="builder-title">
+        <h1 id="builder-title" class="sr-only">Commit builder</h1>
+
+        <div class="field-row">
+          <label for="type">Type</label>
+          <select id="type" name="type">
+            <option value="feat">feat — new feature</option>
+            <option value="fix">fix — bug fix</option>
+            <option value="docs">docs — documentation</option>
+            <option value="style">style — formatting</option>
+            <option value="refactor">refactor — restructure</option>
+            <option value="perf">perf — performance</option>
+            <option value="test">test — tests</option>
+            <option value="chore">chore — maintenance</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <label for="scope">Scope <span class="optional">(optional)</span></label>
+          <input id="scope" name="scope" type="text" placeholder="auth, api, ui" autocomplete="off" />
+        </div>
+
+        <div class="field-row">
+          <label for="subject">Subject</label>
+          <input
+            id="subject"
+            name="subject"
+            type="text"
+            placeholder="add password reset flow"
+            maxlength="72"
+            autocomplete="off"
+            required
+          />
+          <p class="hint"><span id="subject-count">0</span>/72</p>
+        </div>
+
+        <div class="field-row">
+          <label for="body">Body <span class="optional">(optional)</span></label>
+          <textarea
+            id="body"
+            name="body"
+            rows="4"
+            placeholder="Why this change matters. Mention side effects if any."
+          ></textarea>
+        </div>
+
+        <label class="breaking">
+          <input id="breaking" type="checkbox" />
+          Breaking change
+        </label>
+
+        <div class="preview" aria-live="polite">
+          <div class="preview-head">
+            <span>Preview</span>
+            <button type="button" id="copy-btn" class="ghost">Copy</button>
+          </div>
+          <pre id="preview"><code>feat: your subject here</code></pre>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="save-btn" class="primary">Save to history</button>
+          <button type="button" id="reset-btn" class="ghost">Reset</button>
+        </div>
+      </section>
+
+      <section class="history" aria-labelledby="history-title">
+        <div class="history-head">
+          <h2 id="history-title">Recent drafts</h2>
+          <button type="button" id="clear-history" class="ghost small">Clear</button>
+        </div>
+        <ul id="history-list" class="history-list"></ul>
+        <p id="history-empty" class="empty">No drafts yet. Build one above.</p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
