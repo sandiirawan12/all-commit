@@ -1,21 +1,5 @@
 # 📊 Dokumentasi & Penjelasan Rubrik Penilaian (Technical Assessment)
 
-Dokumen ini berisi rangkuman teknis dan panduan untuk menjelaskan kodingan aplikasi **MOC Restoran — Monolith Queue & Dining Management System**. Format ini dibuat agar mudah dipahami dan siap dipakai saat sesi *code review* atau demo ke penguji/user.
-
----
-
-## 📋 Ringkasan Matriks & Bobot Penilaian
-
-| No | Aspek Penilaian | Bobot | Ringkasan Fitur Utama | Lokasi File & Baris Kode |
-| :---: | :--- | :---: | :--- | :--- |
-| 1 | **Algoritma & Logika** | **35%** | Smart Table Matching, Queue Priority (`party_size DESC`), Auto-Seat Engine, Durasi Dinamis | [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L13-L221) (Baris 13-221) |
-| 2 | **Frontend** | **35%** | Denah Meja Interaktif, Status Warna 4 Kondisi, Drag & Drop HTML5, Live Timer Anti-Drift, History Multi-Sort | [`resources/js/components/QueueList.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/QueueList.jsx#L11-L14) (Baris 11-14)<br>[`resources/js/components/TableCard.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/TableCard.jsx#L11-L140) (Baris 11-140)<br>[`resources/js/components/CountdownTimer.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/CountdownTimer.jsx#L1-L36) (Baris 1-36)<br>[`resources/js/components/HistoryTable.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/HistoryTable.jsx#L18-L36) (Baris 18-36) |
-| 3 | **Unit Testing** | **15%** | 8 Feature Tests PHPUnit (Backend) + 6 Unit Tests Vitest (Frontend) + GitHub Actions CI/CD | [`tests/Feature/RestaurantQueueTest.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/tests/Feature/RestaurantQueueTest.php#L49-L72) (Baris 49-72)<br>[`resources/js/__tests__/dashboard.test.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/__tests__/dashboard.test.jsx#L52-L72) (Baris 52-72) |
-| 4 | **Problem Solving** | **10%** | Solusi Dynamic Holding Threshold (Bonus Bagian 3 Revenue Optimization) & Mitigasi JS Timer Drift | [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L34-L46) (Baris 34-46)<br>[`README.md`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/README.md#133-bagian-3-bonus--optimasi-revenue) (Baris 133-196) |
-| 5 | **Code Quality** | **5%** | Service Layer Pattern, Thin Controller, Type Hints PHP 8.3, PSR-12 Linting (Pint), Component-Driven | [`app/Http/Controllers/Api/QueueController.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Http/Controllers/Api/QueueController.php#L14-L47) (Baris 14-47) |
-
----
-
 ## 🧩 1. Algoritma & Logika (Bobot 35%)
 
 Bagian ini mengatur seluruh logika antrean, pemilihan meja otomatis, durasi makan, sampai pengisian antrean otomatis saat ada meja kosong.
