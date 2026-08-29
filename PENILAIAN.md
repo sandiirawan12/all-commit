@@ -1,8 +1,13 @@
 # 📊 Dokumentasi & Penjelasan Rubrik Penilaian (Technical Assessment)
 
-## 🧩 1. Algoritma & Logika (Bobot 35%)
+Dokumen ini berisi rangkuman teknis dan panduan untuk menjelaskan kodingan aplikasi **MOC Restoran — Monolith Queue & Dining Management System**. Format ini dibuat agar mudah dipahami dan siap dipakai saat sesi *code review* atau demo ke penguji/user.
 
-Bagian ini mengatur seluruh logika antrean, pemilihan meja otomatis, durasi makan, sampai pengisian antrean otomatis saat ada meja kosong.
+
+## 🧩 1. Algoritma & Logika (Bobot Penilaian Tertinggi: 35%)
+
+Seluruh logika bisnis sistem restoran terpusat di Service Layer (`app/Services/RestaurantService.php`). Bagian ini mencakup **7 algoritma utama**:
+
+---
 
 ### A. Smart Table Matching (`best-fit capacity`)
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L13-L30)
@@ -87,12 +92,22 @@ return [
 
 ---
 
-### C. Algoritma Prioritas Antrean (`Largest Party First`)
-* **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L84-L93) & [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L103-L127)
-* **Baris Kode**: **84 – 93** & **103 – 127**
+### C. Algoritma Kalkulasi Posisi Antrean
+* **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L76-L99)
+* **Baris Kode**: **76 – 99**
 
 ```php
-// File: app/Services/RestaurantService.php (Baris 84 - 93) - Posisi Antrean
+// File: app/Services/RestaurantService.php (Baris 76 - 99)
+
+$now = Carbon::now();
+$queueItem = WaitingQueue::create([
+    'customer_name' => $customerName,
+    'party_size' => $partySize,
+    'status' => 'waiting',
+    'arrived_at' => $now,
+]);
+
+// Hitung urutan posisi berdasarkan prioritas party terbesar
 $position = WaitingQueue::where('status', 'waiting')
     ->where(function ($query) use ($partySize, $now) {
         $query->where('party_size', '>', $partySize)
@@ -101,10 +116,27 @@ $position = WaitingQueue::where('status', 'waiting')
                   ->where('arrived_at', '<', $now);
             });
     })->count() + 1;
+
+return [
+    'status' => 'queued',
+    'message' => "Meja besar diamankan 15 menit untuk rombongan besar. {$customerName} (Party: {$partySize}) masuk antrean urutan ke-{$position}.",
+    'queue' => $queueItem,
+    'position' => $position,
+];
 ```
+
+* **💬 Cara Menjelaskan ke Penguji/User**:
+  > *"Pas meja lagi penuh, sistem nggak cuma asal masukin nama ke database. Di baris 85-92, sistem langsung ngitung nomor urut antrean secara dinamis. Posisinya dihitung dari berapa banyak antrean lain yang `party_size`-nya lebih besar, atau yang `party_size`-nya sama tapi dateng lebih dulu."*
+
+---
+
+### D. Algoritma Prioritas Antrean (`Largest Party First`)
+* **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L103-L127)
+* **Baris Kode**: **103 – 127**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 103 - 127) - Ambil Antrean Teratas
+
 public function autoAssignNextInQueue(RestaurantTable $table): ?DiningSession
 {
     $nextInQueue = WaitingQueue::where('status', 'waiting')
@@ -133,7 +165,7 @@ public function autoAssignNextInQueue(RestaurantTable $table): ?DiningSession
 ```
 
 * **💬 Cara Menjelaskan ke Penguji/User**:
-  > *"Pas meja penuh dan orang masuk antrean, kita nggak cuma pakai FIFO biasa (siapa datang duluan). Kita pakai prioritas **Largest Party First** di baris 107-108. Kalau meja kapasitas 6 kosong, sistem bakal nyari antrean yang `party_size`-nya paling besar dulu yang muat di meja itu. Misalnya ada antrean 5 orang dan antrean 2 orang, yang didudukin duluan adalah yang 5 orang."*
+  > *"Di fungsi `autoAssignNextInQueue`, kita pakai prioritas **Largest Party First** di baris 107-108. Kalau meja kapasitas 6 kosong, sistem bakal nyari antrean yang `party_size`-nya paling besar dulu yang muat di meja itu (`orderBy party_size desc`). Misalnya ada antrean 5 orang dan antrean 2 orang, yang didudukin duluan adalah yang 5 orang."*
 
 * **💡 Alasan Pakai Pendekatan Ini**:
   1. Kursi Lebih Terisi: Mendudukkan 5 orang di meja 6 buat tingkat keterisian jadi 83%, ketimbang didudukin 2 orang yang cuma 33%.
@@ -144,7 +176,57 @@ public function autoAssignNextInQueue(RestaurantTable $table): ?DiningSession
 
 ---
 
-### D. Pengisian Antrean Otomatis (*Auto-Seat Engine*)
+### E. Algoritma Drag-Drop Manual Assign & Capacity Guard Backend
+* **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L151-L194)
+* **Baris Kode**: **151 – 194**
+
+```php
+// File: app/Services/RestaurantService.php (Baris 151 - 194)
+
+        // Manual assign antrean ke meja (Sisi Backend API Handler)
+        if ($action === 'assign' && $queueId) {
+            $queueItem = WaitingQueue::where('status', 'waiting')->findOrFail($queueId);
+
+            if ($queueItem->party_size > $table->capacity) {
+                throw new \InvalidArgumentException("Party size ({$queueItem->party_size}) melebihi kapasitas Meja {$table->code} ({$table->capacity}).");
+            }
+
+            if ($table->status === 'occupied') {
+                throw new \InvalidArgumentException("Meja {$table->code} sedang terisi.");
+            }
+
+            $now = Carbon::now();
+            $durationMinutes = ($queueItem->party_size * 15) + rand(5, 15);
+            $expectedFinish = (clone $now)->addMinutes($durationMinutes);
+
+            $session = DiningSession::create([
+                'table_id' => $table->id,
+                'waiting_queue_id' => $queueItem->id,
+                'customer_name' => $queueItem->customer_name,
+                'party_size' => $queueItem->party_size,
+                'seated_at' => $now,
+                'duration_minutes' => $durationMinutes,
+                'expected_finish_at' => $expectedFinish,
+                'status' => 'active',
+            ]);
+
+            $queueItem->update(['status' => 'seated']);
+            $table->update(['status' => 'occupied']);
+
+            return [
+                'success' => true,
+                'message' => "Pelanggan {$queueItem->customer_name} berhasil di-assign ke Meja {$table->code}.",
+                'session' => $session,
+            ];
+        }
+```
+
+* **💬 Cara Menjelaskan ke Penguji/User**:
+  > *"Selain otomatisasi, pas kasir geser (*drag & drop*) antrean secara manual, backend tetep ngecek keamanan di baris 163-169. Kalau kasir maksa menempatkan party yang melebihi kapasitas meja atau mejanya lagi terisi, backend bakal lempar `InvalidArgumentException` dan nolak transaksi itu."*
+
+---
+
+### F. Pengisian Antrean Otomatis (*Auto-Seat Engine*) saat Meja Dikosongkan
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L197-L221)
 * **Baris Kode**: **197 – 221**
 
@@ -185,9 +267,70 @@ return [
   1. Meja Nggak Pernah Menganggur: Begitu kosong langsung terisi otomatis.
   2. Kerja Kasir Lebih Ringan: Kasir nggak perlu repot alokasi manual satu per satu.
 
-* **❌ Kenapa Nggak Pakai Cara Lain?**:
-  * **Kalau pakai Cron Job (misal cek tiap 1 menit)**: Meja bisa kosong sampai 1 menit sebelum cron berjalan. Itu bikin antrean lama dan jeda meja menganggur terlalu tinggi.
-  * **Kalau harus di-klik manual kasir**: Kasir sering lupa atau sibuk, jadi meja kosong bisa terbiarkan lama padahal di luar antrean udah menumpuk.
+---
+
+### G. Algoritma Auto-Complete Waktu Habis & Kalkulasi Warna Status Real-Time
+* **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L226-L282)
+* **Baris Kode**: **226 – 282**
+
+```php
+// File: app/Services/RestaurantService.php (Baris 226 - 282)
+
+    public function getStatus(): array
+    {
+        $now = Carbon::now();
+
+        // 1. Auto-complete sesi makan yang waktunya sudah habis (expected_finish_at <= now)
+        $expiredSessions = DiningSession::where('status', 'active')
+            ->where('expected_finish_at', '<=', $now)
+            ->get();
+
+        foreach ($expiredSessions as $expired) {
+            $expired->update([
+                'completed_at' => $now,
+                'status' => 'completed',
+            ]);
+
+            $table = RestaurantTable::find($expired->table_id);
+            if ($table) {
+                $table->update(['status' => 'available']);
+                $this->autoAssignNextInQueue($table);
+            }
+        }
+
+        // 2. Hitung sisa detik dan tentukan warna status meja real-time
+        $tables = RestaurantTable::orderBy('code')->get()->map(function ($t) use ($now) {
+            $activeSession = DiningSession::where('table_id', $t->id)
+                ->where('status', 'active')
+                ->first();
+
+            $sessionData = null;
+            if ($activeSession) {
+                $remainingSeconds = max(0, $activeSession->expected_finish_at->timestamp - $now->timestamp);
+                $elapsedSeconds = max(0, $now->timestamp - $activeSession->seated_at->timestamp);
+
+                $color = 'yellow';
+                if ($remainingSeconds <= 300) {
+                    $color = 'red';
+                } elseif ($elapsedSeconds < 180) {
+                    $color = 'blue';
+                }
+
+                $sessionData = [
+                    'id' => $activeSession->id,
+                    'customer_name' => $activeSession->customer_name,
+                    'party_size' => $activeSession->party_size,
+                    'remaining_seconds' => $remainingSeconds,
+                    'color_status' => $color,
+                ];
+            }
+            return $sessionData;
+        });
+    }
+```
+
+* **💬 Cara Menjelaskan ke Penguji/User**:
+  > *"Di fungsi `getStatus()` baris 232-247, setiap ada pembacaan status dashboard, backend secara otomatis ngecek apakah ada pelanggan yang waktu makannya udah habis (`expected_finish_at <= now`). Kalau ada, sistem langsung menganggapnya selesai (`completed`) dan mendudukkan antrean berikutnya secara otomatis. Selain itu, di baris 264-269 backend ngirim kode warna status (`blue`, `yellow`, `red`) yang langsung dipake frontend."*
 
 ---
 
@@ -225,13 +368,6 @@ if (!isAvailable && activeSession) {
 
 * **💬 Cara Menjelaskan ke Penguji/User**:
   > *"Di kartu meja visual di baris 11-30, kita buat 4 indikator warna status otomatis. Warna **Hijau** artinya meja kosong, **Biru** buat yang baru duduk di bawah 3 menit, **Kuning** buat yang sedang makan, dan **Merah** kalau sisa waktu makan tinggal 5 menit atau kurang. Jadi staf resto cukup ngeliat warna meja aja tanpa perlu baca angka menit satu per satu."*
-
-* **💡 Alasan Pakai Pendekatan Ini**:
-  1. Langsung Kelihatan (Quick Visual Check): Staf kasir atau pelayan langsung tau meja mana yang sebentar lagi mau kosong.
-  2. Tampilan Modern: Menggunakan Tailwind CSS dengan animasi halus biar kelihatan profesional.
-
-* **❌ Kenapa Nggak Pakai Cara Lain?**:
-  * **Kalau cuma 2 warna (Terisi/Kosong)**: Staf nggak bisa tau meja mana yang hampir selesai. Nanti kalau ada pelanggan nanya antrean, staf bingung mau estimasi berapa lama lagi meja bakal kosong.
 
 ---
 
@@ -291,15 +427,6 @@ if (!isAvailable && activeSession) {
 * **💬 Cara Menjelaskan ke Penguji/User**:
   > *"Buat mempermudah kasir, kita sediakan fitur **Drag & Drop bawaan HTML5**. Kasir tinggal geser nama antrean lalu dilepas di kartu meja tujuan. Di baris 129, kita pasang **pengecekan otomatis**: kalau rombongan 6 orang ditarik ke Meja A (kapasitas 2) atau meja yang lagi terisi, sistem bakal nolak secara otomatis (`setDragError(true)`) dan kartu mejanya bakal berubah jadi warna merah tanda tidak muat."*
 
-* **💡 Alasan Pakai Pendekatan Ini**:
-  1. Enak Dipakai: Geser-dan-lepas sangat nyaman dipakai di POS tablet kasir.
-  2. Nggak Pake Library Berat: Kita pakai bawaan HTML5 (`e.dataTransfer`), jadi kodingan tetap ringan dan cepat dimuat.
-  3. Aman dari Salah Tempat: Ada proteksi di frontend biar kasir nggak bisa nempatin rombongan besar di meja kecil.
-
-* **❌ Kenapa Nggak Pakai Cara Lain?**:
-  * **Kalau pakai library external seperti `react-dnd` atau `dnd-kit`**: Ukuran file JavaScript bakal membengkak 50-100KB dan kodingannya jadi lebih rumit padahal kebutuhan kita cukup simpel.
-  * **Kalau pakai Form Dropdown manual**: Kasir harus ngeklik tombol -> pilih meja di dropdown -> pilih nama -> klik submit. Itu lambat banget kalau resto lagi rame.
-
 ---
 
 ### C. Live Countdown Timer Anti-Drift
@@ -337,7 +464,7 @@ export default function CountdownTimer({ expectedFinishAt, onExpire }) {
     const interval = setInterval(() => {
       const remaining = calculateRemainingSeconds(expectedFinishAt);
       setRemainingSeconds(remaining);
-      if (remaining <= 300) {
+      if (remaining <= 0) {
         if (onExpire) onExpire();
       }
     }, 1000);
@@ -348,13 +475,6 @@ export default function CountdownTimer({ expectedFinishAt, onExpire }) {
 
 * **💬 Cara Menjelaskan ke Penguji/User**:
   > *"Timer di layar dihitung di baris 11-16 pakai selisih waktu mutlak (`expected_finish_at - Date.now()`). Kita nggak ngurangin variabel `detik = detik - 1` tiap detik, tapi selalu ngitung selisih jam sekarang sama jam selesai. Jadi timernya dijamin presisi dan enggak bakal ngaco atau ngelag meskipun layar HP/laptop di-minimize."*
-
-* **💡 Alasan Pakai Pendekatan Ini**:
-  1. Selalu Akurat: Waktu yang tampil di layar dijamin sama persis dengan jam riil.
-  2. Tahan Browser Pasif: Walau tab browser sempat ditinggal atau di-background, pas dibuka lagi timernya langsung otomatis menyesuaikan ke detik yang bener.
-
-* **❌ Kenapa Nggak Pakai Cara Lain?**:
-  * **Kalau pakai `detik = detik - 1` di `setInterval` biasa**: Browser zaman sekarang otomatis melambatkan `setInterval` kalau tab lagi nggak dibuka. Kalau pakai `detik - 1`, timernya bisa lambat puluhan detik dibanding waktu asli di dunia nyata.
 
 ---
 
@@ -384,9 +504,6 @@ export default function CountdownTimer({ expectedFinishAt, onExpire }) {
     );
   };
 ```
-
-* **💬 Cara Menjelaskan ke Penguji/User**:
-  > *"Tabel riwayat pelanggan di baris 18-36 kita lengkapi fitur pengurutan kolom. Pengguna tinggal klik judul kolom (seperti Nama, Party, atau Durasi) buat mengurutkan dari A-Z, Z-A, atau terlama/terbaru. Ikon panahnya juga bakal berubah sesuai arah pengurutan."*
 
 ---
 
@@ -426,9 +543,6 @@ public function test_table_assignment_selects_closest_matching_capacity(): void
     ]);
 }
 ```
-
-* **💬 Cara Menjelaskan ke Penguji/User**:
-  > *"Di backend, kita buat 8 tes otomatis pakai PHPUnit. Contohnya di fungsi `test_table_assignment_selects_closest_matching_capacity`, kita ngetes kalau rombongan 3 orang datang, sistem beneran nempatin di Meja B dan statusnya berubah jadi `seated` dengan HTTP 201."*
 
 ---
 
@@ -491,10 +605,6 @@ Solusi masalah bisnis operasional restoran untuk mengoptimalkan pendapatan (*rev
 * **💬 Cara Menjelaskan ke Penguji/User**:
   > *"Buat strategi nambah omset resto di Bagian 3, kita buat logika **Dynamic Holding Threshold** di baris 34-46. Masalahnya gini: kalau ada rombongan 2 orang datang pas Meja A (2) penuh tapi Meja D (8) kosong. Kalau Meja D langsung dikasih ke rombongan 2 orang, resto rugi 75% kapasitas meja D selama 45 menit. Solusinya: kita hitung rasio pemborosan (`wasteRatio`). Kalau pemborosannya 50% atau lebih, sistem bakal **nahan rombongan 2 orang di antrean selama maksimal 15 menit**, biar Meja D tetep aman buat rombongan 7-8 orang yang mungkin datang."*
 
-* **💡 Alasan Pakai Pendekatan Ini**:
-  1. Omset Lebih Maksimal: Meja besar tetep terjaga buat rombongan besar.
-  2. Nggak Bikin Pelanggan Kapok: Pelanggan kecil cuma diminta nunggu maksimal 15 menit. Kalau lewat 15 menit belum ada rombongan besar datang, meja D otomatis dilepas buat rombongan kecil biar meja nggak kosong menganggur.
-
 ---
 
 ## 🧹 5. Kualitas Kode / Code Quality (Bobot 5%)
@@ -539,22 +649,3 @@ Penerapan struktur kodingan yang rapi, bersih, dan mudah dirawat.
         }
     }
 ```
-
-* **💬 Cara Menjelaskan ke Penguji/User**:
-  > *"Dari sisi struktur kodingan, kita menerapkan **Thin Controller & Service Layer**. Controller di baris 14-47 cuma bertugas nerima request dan validasi aja, sedangkan seluruh logika antrean 100% dipisah ke `RestaurantService`. Kodingan juga rapi mematuhi standar PHP 8.3 dan diformat otomatis pakai Laravel Pint."*
-
----
-
-## 🎯 Ringkasan Evaluasi Teknis
-
-| Aspek Penilaian | Bobot | Skor | Ringkasan Kesesuaian |
-| :--- | :---: | :---: | :--- |
-| **1. Algoritma & Logika** | 35% | 35/35 | Best-fit matching, Largest Party First priority queue, & Auto-seat engine berjalan presisi. |
-| **2. Frontend** | 35% | 35/35 | Tampilan denah 4 warna status, Drag & Drop HTML5, live timer anti-drift, & multi-sort table. |
-| **3. Unit Testing** | 15% | 15/15 | 8 Feature tests (PHPUnit) + 6 Unit tests (Vitest) lulus 100% dengan CI/CD pipeline. |
-| **4. Problem Solving** | 10% | 10/10 | Algoritma Dynamic Holding Threshold sukses optimasi omset resto & cegah timer drift. |
-| **5. Code Quality** | 5% | 5/5 | Arsitektur Service Layer, Thin Controller, type safety PHP 8.3, & format Laravel Pint. |
-| **TOTAL SKOR** | **100%** | **100/100** | **Sempurna & Memenuhi Seluruh Kriteria Penilaian** |
-
----
-*Dokumen ini dibuat untuk memandu sesi penjelasan teknis (code walkthrough) dengan bahasa yang santai dan profesional.*
