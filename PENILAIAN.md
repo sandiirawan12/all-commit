@@ -1,5 +1,71 @@
 # 📊 Dokumentasi & Penjelasan Rubrik Penilaian (Technical Assessment)
 
+## 📁 Struktur Folder Project (Project Directory Structure)
+
+Berikut adalah deskripsi struktur folder dan komponen utama dalam project **TestMOCRestoran**:
+
+```
+TestMOCRestoran/
+├── app/                                  # Backend Core & Business Logic (Laravel)
+│   ├── Http/
+│   │   └── Controllers/
+│   │       └── Api/
+│   │           └── QueueController.php   # Controller API Restoran (Thin Controller)
+│   ├── Models/                           # Eloquent ORM Models
+│   │   ├── DiningSession.php             # Model Sesi Makan (Duduk, Estimasi Finish, Selesai)
+│   │   ├── RestaurantTable.php           # Model Meja Restoran (A, B, C, D) & Status
+│   │   └── WaitingQueue.php              # Model Antrean Pelanggan & Party Size
+│   └── Services/
+│       └── RestaurantService.php         # Business Logic Layer (Algoritma Restoran & Redis Cache)
+│
+├── bootstrap/                            # Laravel Bootstrap & Cache Boot
+├── config/                               # Konfigurasi Aplikasi (Cache, Database, Session, Queue)
+│   ├── cache.php                         # Konfigurasi Cache Driver (Redis)
+│   ├── database.php                      # Konfigurasi Database SQLite/MySQL & Redis TLS/Client
+│   └── session.php                       # Konfigurasi Driver Sesi
+│
+├── database/                             # Migrasi & Seeder Database
+│   ├── migrations/                       # Skema Tabel Meja, Sesi Makan, & Queue
+│   └── seeders/                          # Data Seeder Inisialisasi
+│
+├── public/                               # Root Web Publik & Hasil Build Asset Vite
+├── resources/                            # Frontend Source Code (React + Tailwind CSS)
+│   ├── css/
+│   │   └── app.css                       # Global & Custom Styling CSS
+│   └── js/
+│       ├── __tests__/                    # Unit Tests Frontend (Vitest)
+│       │   └── dashboard.test.jsx        # Test Component Dashboard & Drag-and-Drop
+│       ├── components/                   # Komponen Modular UI React
+│       │   ├── ArrivalModal.jsx          # Modal Form Kedatangan Pelanggan Baru
+│       │   ├── CountdownTimer.jsx        # Timer Hitung Mundur Real-Time (Anti-Drift)
+│       │   ├── HistoryTable.jsx          # Tabel Riwayat Makan (Sort, Filter, Search)
+│       │   ├── Navbar.jsx                # Navigation Header & Status Indicator Redis
+│       │   ├── NotificationModal.jsx     # Modal Informasi & Alert Notifikasi
+│       │   ├── QueueList.jsx             # Daftar Antrean Real-Time (Support Drag)
+│       │   ├── RestaurantGrid.jsx        # Grid Denah Layout Meja Restoran
+│       │   ├── RevenueModal.jsx          # Modal Simulasi & Analytics Omset
+│       │   └── TableCard.jsx             # Kartu Visual Meja (4 Warna Status & Drop Zone)
+│       ├── AppDashboard.jsx              # Main Dashboard Container (State & Polling 3 Detik)
+│       ├── app.jsx                       # Entry Point Renderer React DOM
+│       └── setupTests.js                 # Setup Environment Vitest Testing
+│
+├── routes/                               # Route Definitions
+│   ├── api.php                           # REST API Endpoints (/api/status, /api/arrive, /api/serve, /api/history)
+│   └── web.php                           # Web Fallback Route
+│
+├── tests/                                # Backend Automated Tests (PHPUnit / Pest)
+│   └── Feature/
+│       └── RestaurantQueueTest.php       # 13 Test Cases Integration & Business Logic
+│
+├── PENILAIAN.md                          # Dokumen Penjelasan Rubrik Penilaian Technical Assessment
+├── README.md                             # Panduan Instalasi, Fitur & Dokumentasi Arsitektur
+├── package.json                          # Dependencies & Script Frontend (React, Vite, Vitest, Tailwind)
+├── composer.json                         # Dependencies Backend (Laravel, Predis)
+└── vite.config.js                        # Configuration Bundler Vite & Plugin React
+```
+
+---
+
 ## 🧩 1. Algoritma & Logika (Bobot Penilaian Tertinggi: 35%)
 
 Seluruh logika bisnis sistem restoran terpusat di Service Layer (`app/Services/RestaurantService.php`). Bagian ini mencakup **7 algoritma utama**:
@@ -937,6 +1003,21 @@ export default function CountdownTimer({ expectedFinishAt, onExpire }) {
 
   const isWarning = remainingSeconds > 0 && remainingSeconds <= 300; // <= 5 mnt
   const isExpired = remainingSeconds === 0;
+
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold transition-all ${
+      isExpired
+        ? 'bg-red-950/80 text-red-400 border border-red-800/50 animate-pulse'
+        : isWarning
+        ? 'bg-amber-950/80 text-amber-400 border border-amber-800/50'
+        : 'bg-slate-800/80 text-emerald-400 border border-slate-700'
+    }`}>
+      <Clock className="w-3.5 h-3.5" />
+      <span>{isExpired ? 'Waktu Habis!' : formatTime(remainingSeconds)}</span>
+    </div>
+  );
+}
+```
 
   return (
     <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold transition-all ${
