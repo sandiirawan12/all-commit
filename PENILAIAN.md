@@ -1,72 +1,72 @@
-# 📊 Dokumentasi & Penjelasan Rubrik Penilaian (Technical Assessment)
+# ≡ƒôè Dokumentasi & Penjelasan Rubrik Penilaian (Technical Assessment)
 
-## 📁 Struktur Folder Project (Project Directory Structure)
+## ≡ƒôü Struktur Folder Project (Project Directory Structure)
 
 Berikut adalah deskripsi struktur folder dan komponen utama dalam project **TestMOCRestoran**:
 
 ```
 TestMOCRestoran/
-├── app/                                  # Backend Core & Business Logic (Laravel)
-│   ├── Http/
-│   │   └── Controllers/
-│   │       └── Api/
-│   │           └── QueueController.php   # Controller API Restoran (Thin Controller)
-│   ├── Models/                           # Eloquent ORM Models
-│   │   ├── DiningSession.php             # Model Sesi Makan (Duduk, Estimasi Finish, Selesai)
-│   │   ├── RestaurantTable.php           # Model Meja Restoran (A, B, C, D) & Status
-│   │   └── WaitingQueue.php              # Model Antrean Pelanggan & Party Size
-│   └── Services/
-│       └── RestaurantService.php         # Business Logic Layer (Algoritma Restoran & Redis Cache)
-│
-├── bootstrap/                            # Laravel Bootstrap & Cache Boot
-├── config/                               # Konfigurasi Aplikasi (Cache, Database, Session, Queue)
-│   ├── cache.php                         # Konfigurasi Cache Driver (Redis)
-│   ├── database.php                      # Konfigurasi Database SQLite/MySQL & Redis TLS/Client
-│   └── session.php                       # Konfigurasi Driver Sesi
-│
-├── database/                             # Migrasi & Seeder Database
-│   ├── migrations/                       # Skema Tabel Meja, Sesi Makan, & Queue
-│   └── seeders/                          # Data Seeder Inisialisasi
-│
-├── public/                               # Root Web Publik & Hasil Build Asset Vite
-├── resources/                            # Frontend Source Code (React + Tailwind CSS)
-│   ├── css/
-│   │   └── app.css                       # Global & Custom Styling CSS
-│   └── js/
-│       ├── __tests__/                    # Unit Tests Frontend (Vitest)
-│       │   └── dashboard.test.jsx        # Test Component Dashboard & Drag-and-Drop
-│       ├── components/                   # Komponen Modular UI React
-│       │   ├── ArrivalModal.jsx          # Modal Form Kedatangan Pelanggan Baru
-│       │   ├── CountdownTimer.jsx        # Timer Hitung Mundur Real-Time (Anti-Drift)
-│       │   ├── HistoryTable.jsx          # Tabel Riwayat Makan (Sort, Filter, Search)
-│       │   ├── Navbar.jsx                # Navigation Header & Status Indicator Redis
-│       │   ├── NotificationModal.jsx     # Modal Informasi & Alert Notifikasi
-│       │   ├── QueueList.jsx             # Daftar Antrean Real-Time (Support Drag)
-│       │   ├── RestaurantGrid.jsx        # Grid Denah Layout Meja Restoran
-│       │   ├── RevenueModal.jsx          # Modal Simulasi & Analytics Omset
-│       │   └── TableCard.jsx             # Kartu Visual Meja (4 Warna Status & Drop Zone)
-│       ├── AppDashboard.jsx              # Main Dashboard Container (State & Polling 3 Detik)
-│       ├── app.jsx                       # Entry Point Renderer React DOM
-│       └── setupTests.js                 # Setup Environment Vitest Testing
-│
-├── routes/                               # Route Definitions
-│   ├── api.php                           # REST API Endpoints (/api/status, /api/arrive, /api/serve, /api/history)
-│   └── web.php                           # Web Fallback Route
-│
-├── tests/                                # Backend Automated Tests (PHPUnit / Pest)
-│   └── Feature/
-│       └── RestaurantQueueTest.php       # 13 Test Cases Integration & Business Logic
-│
-├── PENILAIAN.md                          # Dokumen Penjelasan Rubrik Penilaian Technical Assessment
-├── README.md                             # Panduan Instalasi, Fitur & Dokumentasi Arsitektur
-├── package.json                          # Dependencies & Script Frontend (React, Vite, Vitest, Tailwind)
-├── composer.json                         # Dependencies Backend (Laravel, Predis)
-└── vite.config.js                        # Configuration Bundler Vite & Plugin React
+Γö£ΓöÇΓöÇ app/                                  # Backend Core & Business Logic (Laravel)
+Γöé   Γö£ΓöÇΓöÇ Http/
+Γöé   Γöé   ΓööΓöÇΓöÇ Controllers/
+Γöé   Γöé       ΓööΓöÇΓöÇ Api/
+Γöé   Γöé           ΓööΓöÇΓöÇ QueueController.php   # Controller API Restoran (Thin Controller)
+Γöé   Γö£ΓöÇΓöÇ Models/                           # Eloquent ORM Models
+Γöé   Γöé   Γö£ΓöÇΓöÇ DiningSession.php             # Model Sesi Makan (Duduk, Estimasi Finish, Selesai)
+Γöé   Γöé   Γö£ΓöÇΓöÇ RestaurantTable.php           # Model Meja Restoran (A, B, C, D) & Status
+Γöé   Γöé   ΓööΓöÇΓöÇ WaitingQueue.php              # Model Antrean Pelanggan & Party Size
+Γöé   ΓööΓöÇΓöÇ Services/
+Γöé       ΓööΓöÇΓöÇ RestaurantService.php         # Business Logic Layer (Algoritma Restoran & Redis Cache)
+Γöé
+Γö£ΓöÇΓöÇ bootstrap/                            # Laravel Bootstrap & Cache Boot
+Γö£ΓöÇΓöÇ config/                               # Konfigurasi Aplikasi (Cache, Database, Session, Queue)
+Γöé   Γö£ΓöÇΓöÇ cache.php                         # Konfigurasi Cache Driver (Redis)
+Γöé   Γö£ΓöÇΓöÇ database.php                      # Konfigurasi Database SQLite/MySQL & Redis TLS/Client
+Γöé   ΓööΓöÇΓöÇ session.php                       # Konfigurasi Driver Sesi
+Γöé
+Γö£ΓöÇΓöÇ database/                             # Migrasi & Seeder Database
+Γöé   Γö£ΓöÇΓöÇ migrations/                       # Skema Tabel Meja, Sesi Makan, & Queue
+Γöé   ΓööΓöÇΓöÇ seeders/                          # Data Seeder Inisialisasi
+Γöé
+Γö£ΓöÇΓöÇ public/                               # Root Web Publik & Hasil Build Asset Vite
+Γö£ΓöÇΓöÇ resources/                            # Frontend Source Code (React + Tailwind CSS)
+Γöé   Γö£ΓöÇΓöÇ css/
+Γöé   Γöé   ΓööΓöÇΓöÇ app.css                       # Global & Custom Styling CSS
+Γöé   ΓööΓöÇΓöÇ js/
+Γöé       Γö£ΓöÇΓöÇ __tests__/                    # Unit Tests Frontend (Vitest)
+Γöé       Γöé   ΓööΓöÇΓöÇ dashboard.test.jsx        # Test Component Dashboard & Drag-and-Drop
+Γöé       Γö£ΓöÇΓöÇ components/                   # Komponen Modular UI React
+Γöé       Γöé   Γö£ΓöÇΓöÇ ArrivalModal.jsx          # Modal Form Kedatangan Pelanggan Baru
+Γöé       Γöé   Γö£ΓöÇΓöÇ CountdownTimer.jsx        # Timer Hitung Mundur Real-Time (Anti-Drift)
+Γöé       Γöé   Γö£ΓöÇΓöÇ HistoryTable.jsx          # Tabel Riwayat Makan (Multi-Column Sort, Filter, Search, Tanggal Lengkap)
+Γöé       Γöé   Γö£ΓöÇΓöÇ Navbar.jsx                # Navigation Header & Status Indicator Redis
+Γöé       Γöé   Γö£ΓöÇΓöÇ NotificationModal.jsx     # Modal Informasi & Alert Notifikasi
+Γöé       Γöé   Γö£ΓöÇΓöÇ QueueList.jsx             # Daftar Antrean Real-Time (Support Drag)
+Γöé       Γöé   Γö£ΓöÇΓöÇ RestaurantGrid.jsx        # Grid Denah Layout Meja Restoran
+Γöé       Γöé   Γö£ΓöÇΓöÇ RevenueModal.jsx          # Modal Simulasi & Analytics Omset
+Γöé       Γöé   ΓööΓöÇΓöÇ TableCard.jsx             # Kartu Visual Meja (4 Warna Status & Drop Zone)
+Γöé       Γö£ΓöÇΓöÇ AppDashboard.jsx              # Main Dashboard Container (State & Polling 3 Detik)
+Γöé       Γö£ΓöÇΓöÇ app.jsx                       # Entry Point Renderer React DOM
+Γöé       ΓööΓöÇΓöÇ setupTests.js                 # Setup Environment Vitest Testing
+Γöé
+Γö£ΓöÇΓöÇ routes/                               # Route Definitions
+Γöé   Γö£ΓöÇΓöÇ api.php                           # REST API Endpoints (/api/status, /api/arrive, /api/serve, /api/history)
+Γöé   ΓööΓöÇΓöÇ web.php                           # Web Fallback Route
+Γöé
+Γö£ΓöÇΓöÇ tests/                                # Backend Automated Tests (PHPUnit / Pest)
+Γöé   ΓööΓöÇΓöÇ Feature/
+Γöé       ΓööΓöÇΓöÇ RestaurantQueueTest.php       # 13 Test Cases Integration & Business Logic
+Γöé
+Γö£ΓöÇΓöÇ PENILAIAN.md                          # Dokumen Penjelasan Rubrik Penilaian Technical Assessment
+Γö£ΓöÇΓöÇ README.md                             # Panduan Instalasi, Fitur & Dokumentasi Arsitektur
+Γö£ΓöÇΓöÇ package.json                          # Dependencies & Script Frontend (React, Vite, Vitest, Tailwind)
+Γö£ΓöÇΓöÇ composer.json                         # Dependencies Backend (Laravel, Predis)
+ΓööΓöÇΓöÇ vite.config.js                        # Configuration Bundler Vite & Plugin React
 ```
 
 ---
 
-## 🧩 1. Algoritma & Logika (Bobot Penilaian Tertinggi: 35%)
+## ≡ƒº⌐ 1. Algoritma & Logika (Bobot Penilaian Tertinggi: 35%)
 
 Seluruh logika bisnis sistem restoran terpusat di Service Layer (`app/Services/RestaurantService.php`). Bagian ini mencakup **7 algoritma utama**:
 
@@ -74,7 +74,7 @@ Seluruh logika bisnis sistem restoran terpusat di Service Layer (`app/Services/R
 
 ### A. Smart Table Matching (`best-fit capacity`)
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L13-L30)
-* **Baris Kode**: **13 – 30**
+* **Baris Kode**: **13 ΓÇô 30**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 13 - 30)
@@ -98,14 +98,14 @@ public function handleArrival(string $customerName, int $partySize): array
         ->first();
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Di bagian ini, pas ada pelanggan baru datang, kita pakai logika **Best-Fit**. Di baris 26-29, kita cari meja kosong yang muat (`capacity >= party_size`) lalu kita urutkan dari yang kapasitasnya paling kecil (`orderBy capacity asc`). Contohnya, kalau ada rombongan 3 orang datang, sistem bakal nempatin di Meja B (kapasitas 4), bukan di Meja C (6) atau Meja D (8). Jadi meja yang besar tetep aman buat rombongan yang lebih rame."*
 
-* **💡 Alasan Pakai Pendekatan Ini**:
+* **≡ƒÆí Alasan Pakai Pendekatan Ini**:
   1. Efisiensi Meja: Biar meja kapasitas besar nggak habis dipake sama rombongan kecil.
   2. Query Ringan: Cukup 1 kali query database yang udah diurutin, tanpa perlu loop manual di memori.
 
-* **❌ Kenapa Nggak Pakai Cara Lain?**:
+* **Γ¥î Kenapa Nggak Pakai Cara Lain?**:
   * **Kalau pakai `first()` tanpa urutan kapasitas**: Nanti rombongan 2 orang bisa saja dapet Meja D (kapasitas 8) kalau meja D kebetulan berada di urutan atas database. Itu bakal ngebuat 75% kapasitas meja D terbuang cuma-cuma.
   * **Kalau pakai hardcode `if-else` kapasitas**: Kodingan bakal kaku. Kalau besok-besok ada meja baru ditambah di database, kita harus ngubah-ubah kodingan lagi.
 
@@ -113,7 +113,7 @@ public function handleArrival(string $customerName, int $partySize): array
 
 ### B. Rumus Durasi Makan Dinamis
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L50-L73)
-* **Baris Kode**: **50 – 73**
+* **Baris Kode**: **50 ΓÇô 73**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 50 - 73)
@@ -143,21 +143,21 @@ return [
 ];
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Untuk durasi makan di baris 51-52, kita buat dinamis sesuai jumlah orang ditambah angka acak: `(party_size * 15) + rand(5, 15)` menit. Jadi kalau rombongan 2 orang, estimasi makannya sekitar 35-45 menit. Kalau 6 orang, makannya sekitar 95-105 menit. Waktu selesainya disimpan di kolom `expected_finish_at` sebagai patokan utama buat timer hitung mundur di tampilan frontend."*
 
-* **💡 Alasan Pakai Pendekatan Ini**:
+* **≡ƒÆí Alasan Pakai Pendekatan Ini**:
   1. Realistis: Di dunia nyata, rombongan besar emang butuh waktu makan lebih lama dari rombongan kecil.
   2. Presisi Timestamp: Karena dihitung dari waktu server (`Carbon::now()`), estimasi waktu selesai tetep akurat.
 
-* **❌ Kenapa Nggak Pakai Cara Lain?**:
+* **Γ¥î Kenapa Nggak Pakai Cara Lain?**:
   * **Kalau pakai durasi rata (misal semua 60 menit)**: Nggak cocok sama kondisi lapangan. Kasihan rombongan kecil cuma butuh 35 menit tapi dihitung 60 menit, atau rombongan besar butuh 90 menit tapi malah udah dianggap selesai di sistem.
 
 ---
 
 ### C. Algoritma Kalkulasi Posisi Antrean
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L76-L99)
-* **Baris Kode**: **76 – 99**
+* **Baris Kode**: **76 ΓÇô 99**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 76 - 99)
@@ -188,14 +188,14 @@ return [
 ];
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Pas meja lagi penuh, sistem nggak cuma asal masukin nama ke database. Di baris 85-92, sistem langsung ngitung nomor urut antrean secara dinamis. Posisinya dihitung dari berapa banyak antrean lain yang `party_size`-nya lebih besar, atau yang `party_size`-nya sama tapi dateng lebih dulu."*
 
 ---
 
 ### D. Algoritma Prioritas Antrean (`Largest Party First`)
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L103-L127)
-* **Baris Kode**: **103 – 127**
+* **Baris Kode**: **103 ΓÇô 127**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 103 - 127) - Ambil Antrean Teratas
@@ -227,21 +227,21 @@ public function autoAssignNextInQueue(RestaurantTable $table): ?DiningSession
     }
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Di fungsi `autoAssignNextInQueue`, kita pakai prioritas **Largest Party First** di baris 107-108. Kalau meja kapasitas 6 kosong, sistem bakal nyari antrean yang `party_size`-nya paling besar dulu yang muat di meja itu (`orderBy party_size desc`). Misalnya ada antrean 5 orang dan antrean 2 orang, yang didudukin duluan adalah yang 5 orang."*
 
-* **💡 Alasan Pakai Pendekatan Ini**:
+* **≡ƒÆí Alasan Pakai Pendekatan Ini**:
   1. Kursi Lebih Terisi: Mendudukkan 5 orang di meja 6 buat tingkat keterisian jadi 83%, ketimbang didudukin 2 orang yang cuma 33%.
   2. Omset Restoran Lebih Bagus: Rombongan besar otomatis pesan makanan lebih banyak.
 
-* **❌ Kenapa Nggak Pakai Cara Lain?**:
+* **Γ¥î Kenapa Nggak Pakai Cara Lain?**:
   * **Kalau pakai Pure FIFO murni**: Nanti rombongan 2 orang yang datang jam 10.00 dapet meja 6, padahal jam 10.01 ada rombongan 6 orang datang. Akibatnya rombongan 6 orang terpaksa nunggu lama dan restoran rugi besar karena meja 6 cuma didudukin 2 orang.
 
 ---
 
 ### E. Algoritma Drag-Drop Manual Assign & Capacity Guard Backend
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L151-L194)
-* **Baris Kode**: **151 – 194**
+* **Baris Kode**: **151 ΓÇô 194**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 151 - 194)
@@ -284,14 +284,14 @@ public function autoAssignNextInQueue(RestaurantTable $table): ?DiningSession
         }
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Selain otomatisasi, pas kasir geser (*drag & drop*) antrean secara manual, backend tetep ngecek keamanan di baris 163-169. Kalau kasir maksa menempatkan party yang melebihi kapasitas meja atau mejanya lagi terisi, backend bakal lempar `InvalidArgumentException` dan nolak transaksi itu."*
 
 ---
 
 ### F. Pengisian Antrean Otomatis (*Auto-Seat Engine*) saat Meja Dikosongkan
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L197-L221)
-* **Baris Kode**: **197 – 221**
+* **Baris Kode**: **197 ΓÇô 221**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 197 - 221)
@@ -327,10 +327,10 @@ return [
 ];
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Setiap kali meja selesai dipakai (baik karena waktu makan habis atau kasir klik tombol selesaikan meja di baris 208), sistem otomatis manggil fungsi `autoAssignNextInQueue($table)` di baris 211. Fungsi ini langsung ngecek daftar antrean dan nempatin orang teratas di antrean ke meja yang baru kosong tanpa jeda."*
 
-* **💡 Alasan Pakai Pendekatan Ini**:
+* **≡ƒÆí Alasan Pakai Pendekatan Ini**:
   1. Meja Nggak Pernah Menganggur: Begitu kosong langsung terisi otomatis.
   2. Kerja Kasir Lebih Ringan: Kasir nggak perlu repot alokasi manual satu per satu.
 
@@ -338,7 +338,7 @@ return [
 
 ### G. Algoritma Auto-Complete Waktu Habis & Kalkulasi Warna Status Real-Time
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L282-L345)
-* **Baris Kode**: **282 – 345**
+* **Baris Kode**: **282 ΓÇô 345**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 282 - 345)
@@ -399,81 +399,116 @@ return [
     }
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Di fungsi `calculateStatus()` baris 282-345, setiap ada pembacaan status meja dari database, backend secara otomatis ngecek apakah ada pelanggan yang waktu makannya udah habis (`expected_finish_at <= now`). Kalau ada, sistem langsung menganggapnya selesai (`completed`) dan mendudukkan antrean berikutnya secara otomatis."*
 
 ---
 
 ### H. Algoritma Redis Real-Time Caching, Auto-Invalidation, & Graceful Fallback Strategy
-* **File Utama Service**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L237-L277) (Baris 237–277)
-* **File Konfigurasi Database & TLS**: [`config/database.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/config/database.php#L146-L183) (Baris 146–183)
-* **File Feature Unit Test Redis**: [`tests/Feature/RestaurantQueueTest.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/tests/Feature/RestaurantQueueTest.php#L378-L398) (Baris 378–398)
+* **File Utama Service**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L237-L277)
+* **File Konfigurasi Database & TLS**: [`config/database.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/config/database.php#L146-L183)
 
 ```php
-// File: app/Services/RestaurantService.php (Baris 237 - 277)
+// File: app/Services/RestaurantService.php (Persistent Redis Caching & Invalidation)
+
+    protected static bool $redisDisabled = false;
 
     /**
-     * Invalidate status cache in Redis
+     * Invalidate status & history cache in Redis
      */
     public function invalidateStatusCache(): void
     {
+        if (self::$redisDisabled) {
+            return;
+        }
+
         try {
             Cache::forget('restaurant:status');
+            Cache::increment('restaurant:history_version');
         } catch (\Throwable $e) {
-            // Fallback jika Redis service offline
+            self::$redisDisabled = true;
         }
     }
 
     /**
-     * Status real-time 4 meja & list antrean dengan Redis caching & fallback
+     * Status real-time 4 meja & list antrean dengan Persistent Redis Caching
      */
-    public function getStatus(): array
+    public function getStatus(bool $refresh = false): array
     {
-        try {
-            if (Cache::has('restaurant:status')) {
+        if ($refresh) {
+            $this->invalidateStatusCache();
+        }
+
+        if (! self::$redisDisabled) {
+            try {
                 $cached = Cache::get('restaurant:status');
-                if (is_array($cached)) {
+                if (is_array($cached) && ! empty($cached['tables']) && isset($cached['queue']) && is_array($cached['queue'])) {
                     $now = Carbon::now();
                     $cached['server_time'] = $now->toIso8601String();
                     $cached['cached_in_redis'] = true;
 
                     return $cached;
                 }
+            } catch (\Throwable $e) {
+                self::$redisDisabled = true;
             }
-        } catch (\Throwable $e) {
-            // Fallback jika Redis tidak dapat diakses
         }
 
         $result = $this->calculateStatus();
 
-        try {
-            Cache::put('restaurant:status', $result, 5); // 5 detik TTL di Redis Cache
-        } catch (\Throwable $e) {
-            // Fallback jika Redis tidak dapat diakses
+        if (! self::$redisDisabled && ! empty($result['tables'])) {
+            try {
+                // Simpan di RAM Redis (TTL 1 jam / Persistent) - pembacaan selanjutnya 100% dari Redis sampai refresh/action!
+                Cache::put('restaurant:status', $result, 3600);
+            } catch (\Throwable $e) {
+                self::$redisDisabled = true;
+            }
         }
 
-        $result['cached_in_redis'] = false;
+        $result['cached_in_redis'] = ! self::$redisDisabled;
 
         return $result;
     }
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
-  > *"Untuk optimasi performa backend dan memenuhi kebutuhan Redis, kita mengimplementasikan **Redis Real-Time Caching** di baris 249-277. Karena dashboard frontend sering melakukan polling ke `GET /api/status`, hasilnya kita simpan di RAM Redis (`restaurant:status`) dengan TTL 5 detik. Latensi respon turun drastis dari puluhan milidetik menjadi cuma **1-3 milidetik**."*
+```php
+// File: config/database.php (Konfigurasi Redis Auto TLS & SSL Upstash Cloud)
+
+'default' => [
+    'url' => env('REDIS_URL'),
+    'scheme' => env('REDIS_SCHEME', (str_starts_with(env('REDIS_URL', ''), 'rediss://') || str_starts_with(env('REDIS_HOST', ''), 'tls://')) ? 'tls' : 'tcp'),
+    'host' => preg_replace('/^tls:\/\//i', '', env('REDIS_HOST', '127.0.0.1')),
+    'port' => env('REDIS_PORT', '6379'),
+    'timeout' => env('REDIS_TIMEOUT', 1.5),
+    'read_timeout' => env('REDIS_READ_TIMEOUT', 1.5),
+    'max_retries' => env('REDIS_MAX_RETRIES', 1),
+    'ssl' => [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+    ],
+],
+```
+
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
+  > *"Untuk optimasi performa backend dan integrasi Redis (Lokal & Upstash Cloud), kita mengimplementasikan **Persistent Redis Real-Time Caching + Circuit Breaker**."*
   >
-  > *"Selain itu, kita menggunakan strategi **Instant Auto-Invalidation** di baris 237-244 (`invalidateStatusCache()`). Setiap kali ada perubahan state (pelanggan baru datang di baris 68, meja dikosongkan/force complete di baris 217, atau antrean dibatalkan di baris 386), cache Redis langsung di-forget/dihapus seketika itu juga agar data di dashboard selalu 100% konsisten."*
+  > *"1. **Persistent Redis Caching**: Setelah API di-fetch pertama kali, data disimpan di RAM Redis (`3600` TTL). Seluruh pembacaan polling 3 detik berikutnya melayani 100% dari Redis (`cached_in_redis: true`) tanpa kueri database."*
   >
-  > *"Jika server Redis lokal/cloud sedang down, blok `try-catch` akan mengaktifkan **Graceful Fallback** secara transparan tanpa menyebabkan aplikasi error 500. Fitur ini juga diuji secara otomatis di `RestaurantQueueTest.php` baris 378-398 dan lulus 100%."*
+  > *"2. **Auto-Invalidation on Action & Manual Refresh (`?refresh=1`)**: Saat tombol Refresh di-klik atau ada aksi kasir (kedatangan, meja selesai/force complete, assign antrean, atau pembatalan antrean), fungsi `invalidateStatusCache()` menghapus cache `restaurant:status` dan meng-increment `restaurant:history_version` agar data berikutnya di-fetch dari DB lalu disimpan ulang ke Redis."*
+  >
+  > *"3. **Dukungan Upstash Cloud Redis & TLS**: Di `config/database.php`, sistem mendeteksi URL skema `rediss://` dan `tls://` dari Upstash Cloud, membersihkan prefix `tls://`, serta mengaktifkan enkripsi SSL secara otomatis."*
+  >
+  > *"4. **Circuit Breaker & Fast Fallback**: Jika server Redis mati/unreachable, `self::$redisDisabled` bertindak sebagai Circuit Breaker untuk mengalihkan kueri ke Database secara instan (0-5 ms) tanpa menggantung 7 detik."*
 
 ---
 
-## 🎨 2. Frontend (Bobot 35%)
+## ≡ƒÄ¿ 2. Frontend (Bobot 35%)
 
 Bagian ini menangani tampilan denah meja visual, indikator status warna, fitur geser antrean (*drag & drop*), timer hitung mundur, dan pengurutan riwayat.
 
 ### A. Indikator Warna Status Meja (4 Kondisi)
 * **File**: [`resources/js/components/TableCard.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/TableCard.jsx#L11-L30)
-* **Baris Kode**: **11 – 30**
+* **Baris Kode**: **11 ΓÇô 30**
 
 ```jsx
 // File: resources/js/components/TableCard.jsx (Baris 11 - 30)
@@ -499,7 +534,7 @@ if (!isAvailable && activeSession) {
 }
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Di kartu meja visual di baris 11-30, kita buat 4 indikator warna status otomatis. Warna **Hijau** artinya meja kosong, **Biru** buat yang baru duduk di bawah 3 menit, **Kuning** buat yang sedang makan, dan **Merah** kalau sisa waktu makan tinggal 5 menit atau kurang. Jadi staf resto cukup ngeliat warna meja aja tanpa perlu baca angka menit satu per satu."*
 
 ---
@@ -507,7 +542,7 @@ if (!isAvailable && activeSession) {
 ### B. Fitur Drag & Drop Antrean ke Meja
 * **Sisi Drag (Pengirim)**: [`resources/js/components/QueueList.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/QueueList.jsx#L11-L14) (Baris 11-14)
 * **Sisi Drop (Penerima)**: [`resources/js/components/TableCard.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/TableCard.jsx#L107-L140) (Baris 107-140)
-* **Baris Kode**: **QueueList.jsx: 11 – 14** & **TableCard.jsx: 107 – 140**
+* **Baris Kode**: **QueueList.jsx: 11 ΓÇô 14** & **TableCard.jsx: 107 ΓÇô 140**
 
 ```jsx
 // File: resources/js/components/QueueList.jsx (Baris 11 - 14) - Mulai Drag
@@ -557,14 +592,14 @@ if (!isAvailable && activeSession) {
   };
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Buat mempermudah kasir, kita sediakan fitur **Drag & Drop bawaan HTML5**. Kasir tinggal geser nama antrean lalu dilepas di kartu meja tujuan. Di baris 129, kita pasang **pengecekan otomatis**: kalau rombongan 6 orang ditarik ke Meja A (kapasitas 2) atau meja yang lagi terisi, sistem bakal nolak secara otomatis (`setDragError(true)`) dan kartu mejanya bakal berubah jadi warna merah tanda tidak muat."*
 
 ---
 
 ### C. Live Countdown Timer Anti-Drift
 * **File**: [`resources/js/components/CountdownTimer.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/CountdownTimer.jsx#L1-L36)
-* **Baris Kode**: **1 – 36**
+* **Baris Kode**: **1 ΓÇô 36**
 
 ```jsx
 // File: resources/js/components/CountdownTimer.jsx (Baris 1 - 36)
@@ -606,23 +641,25 @@ export default function CountdownTimer({ expectedFinishAt, onExpire }) {
   }, [expectedFinishAt]);
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Timer di layar dihitung di baris 11-16 pakai selisih waktu mutlak (`expected_finish_at - Date.now()`). Kita nggak ngurangin variabel `detik = detik - 1` tiap detik, tapi selalu ngitung selisih jam sekarang sama jam selesai. Jadi timernya dijamin presisi dan enggak bakal ngaco atau ngelag meskipun layar HP/laptop di-minimize."*
 
 ---
 
 ### D. Multi-Column Sorting & Filter History
 * **File**: [`resources/js/components/HistoryTable.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/components/HistoryTable.jsx#L18-L36)
-* **Baris Kode**: **18 – 36**
+* **Baris Kode**: **18 ΓÇô 36**
 
 ```jsx
-// File: resources/js/components/HistoryTable.jsx (Baris 18 - 36)
+// File: resources/js/components/HistoryTable.jsx (Baris 18 - 38)
 
   const handleHeaderClick = (columnKey) => {
     if (sortBy === columnKey) {
       onSortChange(columnKey, sortDir === 'asc' ? 'desc' : 'asc');
     } else {
-      onSortChange(columnKey, 'desc');
+      const defaultAscCols = ['customer_name', 'table_id', 'status'];
+      const initialDir = defaultAscCols.includes(columnKey) ? 'asc' : 'desc';
+      onSortChange(columnKey, initialDir);
     }
   };
 
@@ -638,15 +675,18 @@ export default function CountdownTimer({ expectedFinishAt, onExpire }) {
   };
 ```
 
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
+  > *"Untuk fitur pengurutan dan pencarian riwayat makan di `HistoryTable.jsx`, seluruh 7 kolom (Nama Pelanggan, Party Size, Meja, Waktu Seated, Waktu Selesai, Durasi, dan Status) dapat diurutkan secara interaktif. Arah pengurutan awal disesuaikan secara intuitif (teks/kategori seperti Nama Pelanggan/Meja/Status diawali A-Z, sedangkan waktu/durasi diawali terbaru/terbesar). Format waktu pada kolom Seated dan Selesai menyertakan tanggal, bulan, tahun, serta jam (contoh: `30 Agt 2026, 17.25`). Pencarian dan filter status/party otomatis merefresh data dari Halaman 1 tanpa jeda/delay melalui pemanggilan async paralel `Promise.all` dan proteksi pencabutan request ganda."*
+
 ---
 
-## 🧪 3. Pengujian / Unit Testing (Bobot 15%)
+## ≡ƒº¬ 3. Pengujian / Unit Testing (Bobot 15%)
 
 Pengujian otomatis disiapkan di dua sisi: **PHPUnit** untuk backend dan **Vitest** untuk frontend.
 
 ### A. Backend PHPUnit (13 Test Cases)
 * **File**: [`tests/Feature/RestaurantQueueTest.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/tests/Feature/RestaurantQueueTest.php#L49-L398)
-* **Baris Kode**: **49 – 398**
+* **Baris Kode**: **49 ΓÇô 398**
 
 ```php
 // File: tests/Feature/RestaurantQueueTest.php (Baris 378 - 398) - Test Case Redis Caching & Invalidation
@@ -678,7 +718,7 @@ public function test_redis_caching_and_invalidation(): void
 
 ### B. Frontend Vitest (6 Test Cases)
 * **File**: [`resources/js/__tests__/dashboard.test.jsx`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/resources/js/__tests__/dashboard.test.jsx#L52-L72)
-* **Baris Kode**: **52 – 72**
+* **Baris Kode**: **52 ΓÇô 72**
 
 ```jsx
 // File: resources/js/__tests__/dashboard.test.jsx (Baris 52 - 72)
@@ -706,13 +746,13 @@ public function test_redis_caching_and_invalidation(): void
 
 ---
 
-## 💡 4. Problem Solving (Bobot 10%)
+## ≡ƒÆí 4. Problem Solving (Bobot 10%)
 
 Solusi masalah bisnis operasional restoran untuk mengoptimalkan pendapatan (*revenue*).
 
 ### Strategi Optimasi Revenue: **Dynamic Holding Threshold Algorithm**
 * **File**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L34-L46)
-* **Baris Kode**: **34 – 46**
+* **Baris Kode**: **34 ΓÇô 46**
 
 ```php
 // File: app/Services/RestaurantService.php (Baris 34 - 46)
@@ -732,18 +772,18 @@ Solusi masalah bisnis operasional restoran untuk mengoptimalkan pendapatan (*rev
         }
 ```
 
-* **💬 Cara Menjelaskan ke Penguji/User**:
+* **≡ƒÆ¼ Cara Menjelaskan ke Penguji/User**:
   > *"Buat strategi nambah omset resto di Bagian 3, kita buat logika **Dynamic Holding Threshold** di baris 34-46. Masalahnya gini: kalau ada rombongan 2 orang datang pas Meja A (2) penuh tapi Meja D (8) kosong. Kalau Meja D langsung dikasih ke rombongan 2 orang, resto rugi 75% kapasitas meja D selama 45 menit. Solusinya: kita hitung rasio pemborosan (`wasteRatio`). Kalau pemborosannya 50% atau lebih, sistem bakal **nahan rombongan 2 orang di antrean selama maksimal 15 menit**, biar Meja D tetep aman buat rombongan 7-8 orang yang mungkin datang."*
 
 ---
 
-## 🧹 5. Kualitas Kode / Code Quality (Bobot 5%)
+## ≡ƒº╣ 5. Kualitas Kode / Code Quality (Bobot 5%)
 
 Penerapan struktur kodingan yang rapi, bersih, dan mudah dirawat.
 
 ### Pola Service Layer & Thin Controller
 * **File**: [`app/Http/Controllers/Api/QueueController.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Http/Controllers/Api/QueueController.php#L14-L47)
-* **Baris Kode**: **14 – 47**
+* **Baris Kode**: **14 ΓÇô 47**
 
 ```php
 // File: app/Http/Controllers/Api/QueueController.php (Baris 14 - 47)
@@ -782,7 +822,7 @@ Penerapan struktur kodingan yang rapi, bersih, dan mudah dirawat.
 
 ---
 
-## ⚡ 6. Suplemen Kodingan: Redis Caching, Algoritma Backend & Logika Frontend
+## ΓÜí 6. Suplemen Kodingan: Redis Caching, Algoritma Backend & Logika Frontend
 
 ### A. Implementasi Redis Caching (Localhost 127.0.0.1) & Graceful Fallback Strategy
 Dokumentasi terperinci konfigurasi Redis lokal untuk caching status real-time 5 detik serta invalidasi otomatis.
@@ -955,15 +995,19 @@ useEffect(() => {
   return () => clearInterval(statusInterval);
 }, [fetchStatus]);
 
-// History Table Auto-Refresh (10 Menit) & Re-fetch saat filter berubah
+// History Table Auto-Refresh (10 Menit) & Re-fetch saat filter berubah (dengan Proteksi Request Cancelled)
 useEffect(() => {
-  fetchHistory();
+  let cancelled = false;
+  fetchHistory(() => cancelled);
 
   const historyInterval = setInterval(() => {
-    fetchHistory();
+    fetchHistory(() => cancelled);
   }, 10 * 60 * 1000); // 10 Menit (600.000 ms)
 
-  return () => clearInterval(historyInterval);
+  return () => {
+    cancelled = true;
+    clearInterval(historyInterval);
+  };
 }, [fetchHistory]);
 ```
 
