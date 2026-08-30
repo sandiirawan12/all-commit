@@ -105,7 +105,7 @@ public function handleArrival(string $customerName, int $partySize): array
   1. Efisiensi Meja: Biar meja kapasitas besar nggak habis dipake sama rombongan kecil.
   2. Query Ringan: Cukup 1 kali query database yang udah diurutin, tanpa perlu loop manual di memori.
 
-* **Γ¥î Kenapa Nggak Pakai Cara Lain?**:
+* **❌ Kenapa Nggak Pakai Cara Lain?**:
   * **Kalau pakai `first()` tanpa urutan kapasitas**: Nanti rombongan 2 orang bisa saja dapet Meja D (kapasitas 8) kalau meja D kebetulan berada di urutan atas database. Itu bakal ngebuat 75% kapasitas meja D terbuang cuma-cuma.
   * **Kalau pakai hardcode `if-else` kapasitas**: Kodingan bakal kaku. Kalau besok-besok ada meja baru ditambah di database, kita harus ngubah-ubah kodingan lagi.
 
@@ -150,7 +150,7 @@ return [
   1. Realistis: Di dunia nyata, rombongan besar emang butuh waktu makan lebih lama dari rombongan kecil.
   2. Presisi Timestamp: Karena dihitung dari waktu server (`Carbon::now()`), estimasi waktu selesai tetep akurat.
 
-* **Γ¥î Kenapa Nggak Pakai Cara Lain?**:
+* **❌ Kenapa Nggak Pakai Cara Lain?**:
   * **Kalau pakai durasi rata (misal semua 60 menit)**: Nggak cocok sama kondisi lapangan. Kasihan rombongan kecil cuma butuh 35 menit tapi dihitung 60 menit, atau rombongan besar butuh 90 menit tapi malah udah dianggap selesai di sistem.
 
 ---
@@ -234,7 +234,7 @@ public function autoAssignNextInQueue(RestaurantTable $table): ?DiningSession
   1. Kursi Lebih Terisi: Mendudukkan 5 orang di meja 6 buat tingkat keterisian jadi 83%, ketimbang didudukin 2 orang yang cuma 33%.
   2. Omset Restoran Lebih Bagus: Rombongan besar otomatis pesan makanan lebih banyak.
 
-* **Γ¥î Kenapa Nggak Pakai Cara Lain?**:
+* **❌ Kenapa Nggak Pakai Cara Lain?**:
   * **Kalau pakai Pure FIFO murni**: Nanti rombongan 2 orang yang datang jam 10.00 dapet meja 6, padahal jam 10.01 ada rombongan 6 orang datang. Akibatnya rombongan 6 orang terpaksa nunggu lama dan restoran rugi besar karena meja 6 cuma didudukin 2 orang.
 
 ---
@@ -405,16 +405,17 @@ return [
 ---
 
 ### H. Algoritma Redis Real-Time Caching, Auto-Invalidation, & Graceful Fallback Strategy
-* **File Utama Service**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L237-L277)
-* **File Konfigurasi Database & TLS**: [`config/database.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/config/database.php#L146-L183)
+* **File Utama Service**: [`app/Services/RestaurantService.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/app/Services/RestaurantService.php#L237-L277) (Baris 237–277)
+* **File Konfigurasi Database & TLS**: [`config/database.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/config/database.php#L146-L183) (Baris 146–183)
+* **File Feature Unit Test Redis**: [`tests/Feature/RestaurantQueueTest.php`](file:///c:/Users/User/Documents/GitHub/TestMOCRestoran/tests/Feature/RestaurantQueueTest.php#L378-L398) (Baris 378–398)
 
 ```php
-// File: app/Services/RestaurantService.php (Persistent Redis Caching & Invalidation)
+// File: app/Services/RestaurantService.php
 
     protected static bool $redisDisabled = false;
 
     /**
-     * Invalidate status & history cache in Redis
+     * Invalidate status cache in Redis
      */
     public function invalidateStatusCache(): void
     {
@@ -424,21 +425,16 @@ return [
 
         try {
             Cache::forget('restaurant:status');
-            Cache::increment('restaurant:history_version');
         } catch (\Throwable $e) {
             self::$redisDisabled = true;
         }
     }
 
     /**
-     * Status real-time 4 meja & list antrean dengan Persistent Redis Caching
+     * Status real-time 4 meja & list antrean dengan Redis caching & fallback
      */
-    public function getStatus(bool $refresh = false): array
+    public function getStatus(): array
     {
-        if ($refresh) {
-            $this->invalidateStatusCache();
-        }
-
         if (! self::$redisDisabled) {
             try {
                 $cached = Cache::get('restaurant:status');
@@ -458,8 +454,7 @@ return [
 
         if (! self::$redisDisabled && ! empty($result['tables'])) {
             try {
-                // Simpan di RAM Redis (TTL 1 jam / Persistent) - pembacaan selanjutnya 100% dari Redis sampai refresh/action!
-                Cache::put('restaurant:status', $result, 3600);
+                Cache::put('restaurant:status', $result, 5); // 5 detik TTL di Redis Cache
             } catch (\Throwable $e) {
                 self::$redisDisabled = true;
             }
@@ -476,11 +471,11 @@ return [
 
 'default' => [
     'url' => env('REDIS_URL'),
-    'scheme' => env('REDIS_SCHEME', (str_starts_with(env('REDIS_URL', ''), 'rediss://') || str_starts_with(env('REDIS_HOST', ''), 'tls://')) ? 'tls' : 'tcp'),
-    'host' => preg_replace('/^tls:\/\//i', '', env('REDIS_HOST', '127.0.0.1')),
+    'scheme' => env('REDIS_SCHEME', str_starts_with(env('REDIS_URL', ''), 'rediss://') ? 'tls' : 'tcp'),
+    'host' => env('REDIS_HOST', '127.0.0.1'),
     'port' => env('REDIS_PORT', '6379'),
-    'timeout' => env('REDIS_TIMEOUT', 1.5),
-    'read_timeout' => env('REDIS_READ_TIMEOUT', 1.5),
+    'timeout' => env('REDIS_TIMEOUT', 1.0),
+    'read_timeout' => env('REDIS_READ_TIMEOUT', 1.0),
     'max_retries' => env('REDIS_MAX_RETRIES', 1),
     'ssl' => [
         'verify_peer' => false,
@@ -490,15 +485,13 @@ return [
 ```
 
 * **💬 Cara Menjelaskan ke Penguji/User**:
-  > *"Untuk optimasi performa backend dan integrasi Redis (Lokal & Upstash Cloud), kita mengimplementasikan **Persistent Redis Real-Time Caching + Circuit Breaker**."*
+  > *"Untuk optimasi performa backend dan integrasi Redis (Lokal & Upstash Cloud), kita mengimplementasikan **Redis Real-Time Caching + Circuit Breaker**."*
   >
-  > *"1. **Persistent Redis Caching**: Setelah API di-fetch pertama kali, data disimpan di RAM Redis (`3600` TTL). Seluruh pembacaan polling 3 detik berikutnya melayani 100% dari Redis (`cached_in_redis: true`) tanpa kueri database."*
+  > *"1. **Dukungan Upstash Cloud Redis & TLS**: Di `config/database.php`, sistem secara otomatis mendeteksi URL skema `rediss://` dari Upstash Cloud dan mengaktifkan enkripsi SSL/TLS secara transparan."*
   >
-  > *"2. **Auto-Invalidation on Action & Manual Refresh (`?refresh=1`)**: Saat tombol Refresh di-klik atau ada aksi kasir (kedatangan, meja selesai/force complete, assign antrean, atau pembatalan antrean), fungsi `invalidateStatusCache()` menghapus cache `restaurant:status` dan meng-increment `restaurant:history_version` agar data berikutnya di-fetch dari DB lalu disimpan ulang ke Redis."*
+  > *"2. **Circuit Breaker & Short Timeouts**: Jika Redis di server produksi mati atau tidak terjangkau, timeout koneksi dibatasi maksimal 1.0 detik (bukan 7+ detik), dan variabel statis `self::$redisDisabled` langsung aktif sebagai **Circuit Breaker**. Seluruh permintaan API berikutnya dalam proses PHP langsung dialihkan ke Database secara instan dengan latensi **0-5 milidetik** tanpa pernah lagi menggantung/delay."*
   >
-  > *"3. **Dukungan Upstash Cloud Redis & TLS**: Di `config/database.php`, sistem mendeteksi URL skema `rediss://` dan `tls://` dari Upstash Cloud, membersihkan prefix `tls://`, serta mengaktifkan enkripsi SSL secara otomatis."*
-  >
-  > *"4. **Circuit Breaker & Fast Fallback**: Jika server Redis mati/unreachable, `self::$redisDisabled` bertindak sebagai Circuit Breaker untuk mengalihkan kueri ke Database secara instan (0-5 ms) tanpa menggantung 7 detik."*
+  > *"3. **Instant Auto-Invalidation**: Setiap ada perubahan state (pelanggan baru datang, meja dikosongkan/force complete, atau antrean dibatalkan), cache Redis langsung di-`forget()` seketika itu juga agar data di dashboard selalu 100% konsisten."*
 
 ---
 
@@ -777,7 +770,7 @@ Solusi masalah bisnis operasional restoran untuk mengoptimalkan pendapatan (*rev
 
 ---
 
-## ≡ƒº╣ 5. Kualitas Kode / Code Quality (Bobot 5%)
+## 🧹 5. Kualitas Kode / Code Quality (Bobot 5%)
 
 Penerapan struktur kodingan yang rapi, bersih, dan mudah dirawat.
 
@@ -822,7 +815,7 @@ Penerapan struktur kodingan yang rapi, bersih, dan mudah dirawat.
 
 ---
 
-## ΓÜí 6. Suplemen Kodingan: Redis Caching, Algoritma Backend & Logika Frontend
+## ⚡ 6. Suplemen Kodingan: Redis Caching, Algoritma Backend & Logika Frontend
 
 ### A. Implementasi Redis Caching (Localhost 127.0.0.1) & Graceful Fallback Strategy
 Dokumentasi terperinci konfigurasi Redis lokal untuk caching status real-time 5 detik serta invalidasi otomatis.
