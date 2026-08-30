@@ -706,3 +706,242 @@ Penerapan struktur kodingan yang rapi, bersih, dan mudah dirawat.
         }
     }
 ```
+
+---
+
+## ⚡ 6. Suplemen Kodingan: Redis Caching, Algoritma Backend & Logika Frontend
+
+### A. Implementasi Redis Caching (Localhost 127.0.0.1) & Graceful Fallback Strategy
+Dokumentasi terperinci konfigurasi Redis lokal untuk caching status real-time 5 detik serta invalidasi otomatis.
+
+#### 1. Konfigurasi Environment & Driver Redis (.env)
+```env
+# Redis Configuration (Localhost 127.0.0.1)
+CACHE_STORE=redis
+REDIS_CLIENT=predis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_PASSWORD=null
+```
+
+#### 2. Kodingan Caching & Instant Invalidation di Backend Service
+```php
+// File: app/Services/RestaurantService.php
+
+    /**
+     * Invalidate status cache di Redis seketika saat ada perubahan data transaksi
+     */
+    public function invalidateStatusCache(): void
+    {
+        try {
+            Cache::forget('restaurant:status');
+        } catch (\Throwable $e) {
+            // Fallback jika Redis service offline
+        }
+    }
+
+    /**
+     * Pembacaan status 4 meja & antrean dari Redis dengan Graceful Fallback
+     */
+    public function getStatus(): array
+    {
+        try {
+            if (Cache::has('restaurant:status')) {
+                $cached = Cache::get('restaurant:status');
+                if (is_array($cached) && !empty($cached['tables']) && isset($cached['queue']) && is_array($cached['queue'])) {
+                    $now = Carbon::now();
+                    $cached['server_time'] = $now->toIso8601String();
+                    $cached['cached_in_redis'] = true;
+
+                    return $cached;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Graceful Fallback jika Redis offline (otomatis lanjut baca dari DB)
+        }
+
+        $result = $this->calculateStatus();
+
+        if (!empty($result['tables'])) {
+            try {
+                Cache::put('restaurant:status', $result, 5); // TTL 5 Detik di Redis Cache
+            } catch (\Throwable $e) {
+                // Graceful Fallback jika Redis offline
+            }
+        }
+
+        $result['cached_in_redis'] = false;
+
+        return $result;
+    }
+```
+
+---
+
+### B. Algoritma & Logika Backend: Prioritas Party & Dynamic Holding Threshold
+
+```php
+// File: app/Services/RestaurantService.php
+
+// 1. Kalkulasi Urutan Posisi Antrean Dinamis (Largest Party First)
+$position = WaitingQueue::where('status', 'waiting')
+    ->where(function ($query) use ($partySize, $now) {
+        $query->where('party_size', '>', $partySize)
+            ->orWhere(function ($q) use ($partySize, $now) {
+                $q->where('party_size', '=', $partySize)
+                    ->where('arrived_at', '<', $now);
+            });
+    })->count() + 1;
+
+// 2. Auto-Assign Antrean Teratas dengan Dynamic Holding Threshold (15 Menit)
+public function autoAssignNextInQueue(RestaurantTable $table): ?DiningSession
+{
+    $nextInQueue = WaitingQueue::where('status', 'waiting')
+        ->where('party_size', '<=', $table->capacity)
+        ->orderBy('party_size', 'desc')
+        ->orderBy('arrived_at', 'asc')
+        ->first();
+
+    if (!$nextInQueue) {
+        return null;
+    }
+
+    // Evaluasi pemborosan kapasitas (Waste Ratio >= 50%)
+    $wasteRatio = ($table->capacity - $nextInQueue->party_size) / $table->capacity;
+    if ($wasteRatio >= 0.5) {
+        $now = Carbon::now();
+        $arrivedAt = $nextInQueue->arrived_at ? Carbon::parse($nextInQueue->arrived_at) : $now;
+        $waitedMinutes = $arrivedAt->diffInMinutes($now);
+
+        // Jika belum 15 menit menunggu, tahan antrean kecil agar meja kapasitas lebih besar tetap terjaga
+        if ($waitedMinutes < 15) {
+            return null;
+        }
+    }
+
+    $now = Carbon::now();
+    $durationMinutes = ($nextInQueue->party_size * 15) + rand(5, 15);
+    $expectedFinish = (clone $now)->addMinutes($durationMinutes);
+
+    $session = DiningSession::create([
+        'table_id' => $table->id,
+        'waiting_queue_id' => $nextInQueue->id,
+        'customer_name' => $nextInQueue->customer_name,
+        'party_size' => $nextInQueue->party_size,
+        'seated_at' => $now,
+        'duration_minutes' => $durationMinutes,
+        'expected_finish_at' => $expectedFinish,
+        'status' => 'active',
+    ]);
+
+    $nextInQueue->update(['status' => 'seated']);
+    $table->update(['status' => 'occupied']);
+
+    return $session;
+}
+```
+
+---
+
+### C. Logika & Arsitektur Frontend: Polling Protektif & Expiry Lock Timer
+
+#### 1. Polling Terpisah & Proteksi State Denah (`AppDashboard.jsx`)
+```jsx
+// File: resources/js/AppDashboard.jsx
+
+// Fetch Status Real-Time dengan Proteksi Data Kosong (Mencegah Denah & Antrean Hilang)
+const fetchStatus = useCallback(async (isManual = false) => {
+  try {
+    if (isManual) setIsRefreshing(true);
+    const res = await fetch(`${API_BASE_URL}/api/status`);
+    if (!res.ok) throw new Error('Gagal mengambil status restoran');
+    const data = await res.json();
+    
+    // Safeguard: Hanya update state jika array valid (mencegah denah & antrean terhapus jika ada lag API)
+    if (Array.isArray(data.tables) && data.tables.length > 0) {
+      setTables(data.tables);
+    }
+    if (Array.isArray(data.queue)) {
+      setQueue(data.queue);
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (isManual) setIsRefreshing(false);
+  }
+}, [API_BASE_URL]);
+
+// Real-Time Status Polling (3 Detik dari Redis Cache)
+useEffect(() => {
+  fetchStatus(false);
+
+  const statusInterval = setInterval(() => {
+    fetchStatus(false);
+  }, 3000); // 3 Detik polling stabil
+
+  return () => clearInterval(statusInterval);
+}, [fetchStatus]);
+
+// History Table Auto-Refresh (10 Menit) & Re-fetch saat filter berubah
+useEffect(() => {
+  fetchHistory();
+
+  const historyInterval = setInterval(() => {
+    fetchHistory();
+  }, 10 * 60 * 1000); // 10 Menit (600.000 ms)
+
+  return () => clearInterval(historyInterval);
+}, [fetchHistory]);
+```
+
+#### 2. Logika Expiry Lock pada Timer Hitung Mundur (`CountdownTimer.jsx`)
+```jsx
+// File: resources/js/components/CountdownTimer.jsx
+
+export default function CountdownTimer({ expectedFinishAt, onExpire }) {
+  const [remainingSeconds, setRemainingSeconds] = useState(() =>
+    calculateRemainingSeconds(expectedFinishAt)
+  );
+  
+  // Ref lock untuk mencegah callback onExpire dipicu berulang kali tiap detik saat waktu 0
+  const hasExpiredRef = useRef(false);
+
+  useEffect(() => {
+    const initialRemaining = calculateRemainingSeconds(expectedFinishAt);
+    setRemainingSeconds(initialRemaining);
+    hasExpiredRef.current = initialRemaining <= 0;
+
+    const interval = setInterval(() => {
+      const remaining = calculateRemainingSeconds(expectedFinishAt);
+      setRemainingSeconds(remaining);
+      
+      if (remaining <= 0) {
+        if (!hasExpiredRef.current) {
+          hasExpiredRef.current = true;
+          if (onExpire) onExpire(); // Hanya dipicu TEPAT 1 KALI saat pertama kali habis
+        }
+      } else {
+        hasExpiredRef.current = false;
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [expectedFinishAt]);
+
+  const isWarning = remainingSeconds > 0 && remainingSeconds <= 300; // <= 5 mnt
+  const isExpired = remainingSeconds === 0;
+
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-bold transition-all ${
+      isExpired
+        ? 'bg-red-950/80 text-red-400 border border-red-800/50 animate-pulse'
+        : isWarning
+        ? 'bg-amber-950/80 text-amber-400 border border-amber-800/50'
+        : 'bg-slate-800/80 text-emerald-400 border border-slate-700'
+    }`}>
+      <Clock className="w-3.5 h-3.5" />
+      <span>{isExpired ? 'Waktu Habis!' : formatTime(remainingSeconds)}</span>
+    </div>
+  );
+}
+```
