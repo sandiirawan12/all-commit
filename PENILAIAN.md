@@ -235,8 +235,12 @@ $activeSession = DiningSession::where('table_id', $table->id)
     ->first();
 
 if ($activeSession) {
+    $completedAt = Carbon::now();
+    $actualDuration = max(1, (int) round($activeSession->seated_at->diffInSeconds($completedAt) / 60));
+
     $activeSession->update([
-        'completed_at' => Carbon::now(),
+        'completed_at' => $completedAt,
+        'duration_minutes' => $actualDuration,
         'status' => $action === 'force' ? 'force_completed' : 'completed',
     ]);
 }
@@ -283,8 +287,11 @@ return [
             ->get();
 
         foreach ($expiredSessions as $expired) {
+            $actualDuration = max(1, (int) round($expired->seated_at->diffInSeconds($now) / 60));
+
             $expired->update([
                 'completed_at' => $now,
+                'duration_minutes' => $actualDuration,
                 'status' => 'completed',
             ]);
 
